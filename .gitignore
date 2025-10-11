@@ -1,0 +1,91 @@
+# === Scala / sbt ===
+target/
+project/target/
+project/project/
+.cache/
+.metals/
+.bloop/
+.idea/
+.vscode/
+*.iml
+*.class
+*.log
+*.tmp
+
+# === Chisel / Verilator 生成文件 ===
+test_run_dir/
+generated/
+verilator_out/
+*.vcd
+*.fir
+*.anno.json
+*.anno
+*.sv
+*.v
+*.cpp
+*.h
+*.d
+*.o
+*.out
+*.fst
+
+# === Quartus FPGA 工程文件 ===
+# (保留 .qpf 和 .qsf 以便重建工程)
+db/
+incremental_db/
+output_files/
+simulation/
+*.rpt
+*.sof
+*.pof
+*.smsg
+*.jdi
+*.qar
+*.qws
+*.bak
+*.cdf
+*.pin
+*.cmp
+*.summary
+
+# === Build / Package ===
+dist/
+bin/
+out/
+*.jar
+*.zip
+*.tar
+*.gz
+
+# === OS / System ===
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+
+# === Python / Notebook (如果用到辅助脚本) ===
+__pycache__/
+*.pyc
+*.ipynb_checkpoints/
+
+# === Temp / Custom ===
+logs/
+*.bak
+*.old
+*.orig
+*.rej
+*.save
+*.tmp
+
+# === Environment / Tooling ===
+.env
+.venv/
+sbt.lock
+coursier/
+ivy/
+.ivy2/
+.local/
+.m2/
