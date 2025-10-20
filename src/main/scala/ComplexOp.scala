@@ -243,7 +243,7 @@ class SearchErc extends Module {
     ).map(_.F(width.W, fracBits.BP))
   )
 
-  val absx = Mux(io.x < 0.F(16.W, 8.BP), -io.x, io.x)
+  val absx = Mux(io.x < 0.F(width.W, fracBits.BP), -io.x, io.x)
   val y_fp =
     ((absx * 100.F(width.W, fracBits.BP)) + 0.5.F(width.W, fracBits.BP))
   val y = (y_fp.asUInt >> y_fp.binaryPoint.get.U)
@@ -262,4 +262,63 @@ class SearchErc extends Module {
   }
 
   io.out := result
+}
+
+class Cordic extends Module {
+  import config.CordicConst._
+
+  val io = IO(new Bundle {
+    val theta = Input(FixedPoint(width.W, fracBits.BP))
+    val start = Input(Bool())
+    val cosOut = Output(FixedPoint(width.W, fracBits.BP))
+    val sinOut = Output(FixedPoint(width.W, fracBits.BP))
+    val done = Output(Bool())
+  })
+
+  val current_cos = RegInit((K).F(width.W, fracBits.BP))
+  val current_sin = RegInit(0.F(width.W, fracBits.BP))
+  val theta_reg = Reg(FixedPoint(width.W, fracBits.BP))
+  val iter = RegInit(0.U(6.W))
+  val busy = RegInit(false.B)
+
+  val invPowerOfTwoTable =
+    VecInit(invPowerOfTwoTableScala.map(_.F(width.W, fracBits.BP)))
+  val cordicPhaseTable =
+    VecInit(cordicPhaseScala.map(_.F(width.W, fracBits.BP)))
+
+  io.done := !busy
+
+  when(io.start && !busy) {
+    busy := true.B
+    iter := 0.U
+    current_cos := (K).F(width.W, fracBits.BP)
+    current_sin := 0.F(width.W, fracBits.BP)
+    theta_reg := io.theta * (180.0 / pi).F(width.W, fracBits.BP)
+  }
+
+  when(busy) {
+    val sigma = Mux(
+      theta_reg < 0.F(width.W, fracBits.BP),
+      -1.F(width.W, fracBits.BP),
+      1.F(width.W, fracBits.BP)
+    )
+
+    val factor = invPowerOfTwoTable(iter)
+    val temp_cos = current_cos
+
+    current_cos := current_cos - (current_sin * sigma * factor)
+    current_sin := temp_cos * sigma * factor + current_sin
+
+    val phase = cordicPhaseTable(iter)
+    theta_reg := theta_reg - sigma * phase
+
+    iter := iter + 1.U
+
+    when(iter === (numIter - 1).U) {
+      busy := false.B
+    }
+  }
+
+  io.cosOut := current_cos
+  io.sinOut := current_sin
 }

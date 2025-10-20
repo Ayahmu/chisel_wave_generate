@@ -75,4 +75,27 @@ class WaveTest extends AnyFlatSpec with ChiselScalatestTester {
           println(s"erf = ${dut.io.out.peek().litValue.toDouble / scale}")
       }
   }
+
+  "Cordic" should "compute sine and cosine correctly" in {
+    test(new Cordic)
+      .withAnnotations(Seq(VerilatorBackendAnnotation, WriteVcdAnnotation)) {
+        dut =>
+          dut.io.theta.poke(
+            (math.Pi / 6.0).F(width.W, fracBits.BP)
+          ) // 30 degrees
+          dut.io.start.poke(true.B)
+          dut.clock.step(1)
+          dut.io.start.poke(false.B)
+
+          while (!dut.io.done.peek().litToBoolean) {
+            dut.clock.step(1)
+          }
+          dut.clock.step(1)
+
+          val scale = 1L << fracBits
+          println(
+            s"cos(30) = ${dut.io.cosOut.peek().litValue.toDouble / scale}, sin(30) = ${dut.io.sinOut.peek().litValue.toDouble / scale}"
+          )
+      }
+  }
 }

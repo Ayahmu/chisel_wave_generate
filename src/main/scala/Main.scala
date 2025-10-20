@@ -4,7 +4,7 @@ object Main extends App {
   println("Generating the Top hardware...")
   
   (new chisel3.stage.ChiselStage).emitVerilog(
-    new fp_add,
+    new SearchErc,
     Array("--target-dir", "generated")
   )
 }
