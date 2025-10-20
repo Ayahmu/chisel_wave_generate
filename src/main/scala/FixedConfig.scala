@@ -1,6 +1,6 @@
 package config
 
 object FixedConfig {
-  val width = 16
-  val fracBits = 8
+  val width = 64
+  val fracBits = 32
 }
