@@ -4,10 +4,12 @@ import chiseltest.simulator.{VerilatorBackendAnnotation, WriteVcdAnnotation}
 import org.scalatest.flatspec.AnyFlatSpec
 
 import config.FixedConfig._
+import complex._
+import basicop._
 
 class WaveTest extends AnyFlatSpec with ChiselScalatestTester {
   it should "add two fixed-point numbers" in {
-    test(new cpl_add(width, fracBits))
+    test(new cpl_add)
       .withAnnotations(Seq(VerilatorBackendAnnotation, WriteVcdAnnotation)) {
         dut =>
           dut.io.a.real.poke(1.25.F(width.W, fracBits.BP))
@@ -28,7 +30,7 @@ class WaveTest extends AnyFlatSpec with ChiselScalatestTester {
   }
 
   "Pow" should "compute x^n correctly" in {
-    test(new Pow(width, fracBits))
+    test(new Pow)
       .withAnnotations(Seq(VerilatorBackendAnnotation, WriteVcdAnnotation)) {
         dut =>
           dut.io.x.poke(2.0.F(width.W, fracBits.BP))
@@ -46,7 +48,7 @@ class WaveTest extends AnyFlatSpec with ChiselScalatestTester {
   }
 
   "Exp" should "compute e^x correctly" in {
-    test(new Exp(width, fracBits))
+    test(new Exp)
       .withAnnotations(Seq(VerilatorBackendAnnotation, WriteVcdAnnotation)) {
         dut =>
           dut.io.x.poke(1.0.F(width.W, fracBits.BP))
@@ -65,7 +67,7 @@ class WaveTest extends AnyFlatSpec with ChiselScalatestTester {
   }
 
   "SearchErc" should "look up e^(-x) correctly" in {
-    test(new SearchErc())
+    test(new SearchErc)
       .withAnnotations(Seq(VerilatorBackendAnnotation, WriteVcdAnnotation)) {
         dut =>
           dut.io.x.poke(3.0.F(width.W, fracBits.BP))
@@ -81,7 +83,7 @@ class WaveTest extends AnyFlatSpec with ChiselScalatestTester {
       .withAnnotations(Seq(VerilatorBackendAnnotation, WriteVcdAnnotation)) {
         dut =>
           dut.io.theta.poke(
-            (math.Pi / 6.0).F(width.W, fracBits.BP)
+            (math.Pi / 6.0).F(thetaWidth.W, thetaFracBits.BP)
           ) // 30 degrees
           dut.io.start.poke(true.B)
           dut.clock.step(1)
@@ -92,7 +94,7 @@ class WaveTest extends AnyFlatSpec with ChiselScalatestTester {
           }
           dut.clock.step(1)
 
-          val scale = 1L << fracBits
+          val scale = 1L << cossinFracBits
           println(
             s"cos(30) = ${dut.io.cosOut.peek().litValue.toDouble / scale}, sin(30) = ${dut.io.sinOut.peek().litValue.toDouble / scale}"
           )
